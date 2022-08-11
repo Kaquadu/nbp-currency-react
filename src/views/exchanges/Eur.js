@@ -1,22 +1,22 @@
 import React from "react";
 import ExchangeCard from "../../components/exchange/ExchangeCard";
+import axios from "axios";
 
-class Eur extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rate: 4.85,
-    }
-  }
+export default function Eur() {
+  const [rate, setRate] = React.useState(null);
 
-  render() {
-    return (
-      <ExchangeCard
-        rate={this.state.rate}
-        exchangeText='EUR-PLN'
-      />
-    );
-  }
+  React.useEffect(() => {
+    axios.get('https://api.nbp.pl/api/exchangerates/rates/a/eur/').then((response) => {
+      setRate(response.data.rates[0].mid);
+    });
+  }, []);
+
+  if (!rate) return null;
+
+  return (
+    <ExchangeCard
+      rate={rate}
+      exchangeText='EUR-PLN'
+    />
+  );
 }
-
-export default Eur;
