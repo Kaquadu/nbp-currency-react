@@ -1,21 +1,32 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import ExchangeCard from "../../components/exchange/ExchangeCard";
 import axios from "axios";
 
 export default function Usd() {
-  const [rate, setRate] = React.useState(null);
+  let [currentRate, setRate] = useState(null);
+  let [historyRates, setHistoryRates] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios.get('https://api.nbp.pl/api/exchangerates/rates/a/usd/').then((response) => {
       setRate(response.data.rates[0].mid);
     });
-  }, []);
 
-  if (!rate) return null;
+    let rates = [];
+    axios.get('http://api.nbp.pl/api/exchangerates/rates/a/usd/last/30/?format=json').then((response) => {
+      response.data.rates.forEach(rate => {
+        rates.push({rate: rate.mid, date: rate.effectiveDate});
+      });
+    })
+    setHistoryRates(rates);
+  }, [currentRate]);
+
+  if (!currentRate) return null;
+  if (historyRates === []) return null;
 
   return (
     <ExchangeCard
-      rate={rate}
+      historyRates={historyRates}
+      currentRate={currentRate}
       exchangeText='USD-PLN'
     />
   );
