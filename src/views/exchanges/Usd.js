@@ -7,8 +7,11 @@ export default function Usd() {
   let [historyRates, setHistoryRates] = useState([]);
 
   useEffect(() => {
+    let ignore = false;
     axios.get('https://api.nbp.pl/api/exchangerates/rates/a/usd/').then((response) => {
-      setRate(response.data.rates[0].mid);
+      if (!ignore) {
+        setRate(response.data.rates[0].mid);
+      }
     });
 
     let rates = [];
@@ -17,7 +20,13 @@ export default function Usd() {
         rates.push({rate: rate.mid, date: rate.effectiveDate});
       });
     })
-    setHistoryRates(rates);
+    if (!ignore) {
+      setHistoryRates(rates);
+    }
+
+    return () => {
+      ignore = true;
+    };
   }, [currentRate]);
 
   if (!currentRate) return null;
